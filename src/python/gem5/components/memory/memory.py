@@ -32,7 +32,7 @@ from ...utils.override import overrides
 from m5.util.convert import toMemorySize
 from ..boards.abstract_board import AbstractBoard
 from .abstract_memory_system import AbstractMemorySystem
-from m5.objects import AddrRange, DRAMInterface, MemCtrl, Port
+from m5.objects import AddrRange, DRAMInterface, MemCtrl, Port, TaintFetchMerge
 from typing import Type, Sequence, Tuple, List, Optional, Union
 
 
@@ -112,6 +112,9 @@ class ChanneledMemory(AbstractMemorySystem):
             MemCtrl(dram=self._dram[i]) for i in range(num_channels)
         ]
 
+        for ctrl in self.mem_ctrl:
+            ctrl.taintFM = TaintFetchMerge()
+
     def _get_dram_size(self, num_channels: int, dram: DRAMInterface) -> int:
         return num_channels * (
             dram.device_size.value
@@ -157,7 +160,15 @@ class ChanneledMemory(AbstractMemorySystem):
 
     @overrides(AbstractMemorySystem)
     def get_mem_ports(self) -> Sequence[Tuple[AddrRange, Port]]:
-        return [(ctrl.dram.range, ctrl.port) for ctrl in self.mem_ctrl]
+        result = []
+        for i in range(self._num_channels):
+            ctrl = self.mem_ctrl[i]
+            taintFM = ctrl.taintFM
+            ctrl.port = taintFM.mem_side
+            print("Hello")
+            result.append((ctrl.dram.range, taintFM.cpu_side))
+            print("TaintFetchMerge connected!")
+        return result
 
     @overrides(AbstractMemorySystem)
     def get_memory_controllers(self) -> List[MemCtrl]:

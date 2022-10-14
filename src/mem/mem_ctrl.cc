@@ -49,6 +49,7 @@
 #include "mem/dram_interface.hh"
 #include "mem/mem_interface.hh"
 #include "mem/nvm_interface.hh"
+#include "mem/taint_fetch_merge.hh"
 #include "sim/system.hh"
 
 namespace gem5
@@ -66,6 +67,7 @@ MemCtrl::MemCtrl(const MemCtrlParams &p) :
     respondEvent([this] {processRespondEvent(dram, respQueue,
                          respondEvent, retryRdReq); }, name()),
     dram(p.dram),
+    taintFM(p.taintFM),
     readBufferSize(dram->readBufferSize),
     writeBufferSize(dram->writeBufferSize),
     writeHighThreshold(writeBufferSize * p.write_high_thresh_perc / 100.0),

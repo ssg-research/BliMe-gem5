@@ -41,6 +41,7 @@
 from m5.params import *
 from m5.proxy import *
 from m5.objects.QoSMemCtrl import *
+from m5.objects import TaintFetchMerge
 
 # Enum for memory scheduling algorithms, currently First-Come
 # First-Served and a First-Row Hit then First-Come First-Served
@@ -62,6 +63,9 @@ class MemCtrl(QoSMemCtrl):
     # Interface to memory media
     dram = Param.MemInterface("Memory interface, can be a DRAM"
                               "or an NVM interface ")
+
+    taintFM = Param.TaintFetchMerge("TaintFetchMerge unit"
+                                    "connected to this controller")
 
     # read and write buffer depths are set in the interface
     # the controller will read these values when instantiated

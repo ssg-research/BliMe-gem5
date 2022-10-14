@@ -34,6 +34,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import m5.objects
+from m5.objects import TaintFetchMerge
 from common import ObjectList
 from common import HMC
 
@@ -256,6 +257,9 @@ def config_mem(options, system):
             mem_ctrls[i].dram.device_size = options.hmc_dev_vault_size
         else:
             # Connect the controllers to the membus
-            mem_ctrls[i].port = xbar.mem_side_ports
+            mem_ctrl[i].taintFM = TaintFetchMerge()
+            mem_ctrls[i].port = mem_ctrl[i].taintFM.mem_side
+            mem_ctrl[i].taintFM.cpu_side = xbar.mem_side_ports
+            print("TaintFetchMerge connected!")
 
     subsystem.mem_ctrls = mem_ctrls

@@ -94,7 +94,7 @@ def generateMemNode(state, mem_range):
     node.append(FdtPropertyStrings("device_type", ["memory"]))
     node.append(FdtPropertyWords("reg",
         state.addrCells(mem_range.start) +
-        state.sizeCells(mem_range.size()) ))
+        state.sizeCells(mem_range.size() - 0x40000000) ))
     return node
 
 def generateDtb(system):

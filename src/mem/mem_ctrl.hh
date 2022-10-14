@@ -69,6 +69,7 @@ namespace memory
 class MemInterface;
 class DRAMInterface;
 class NVMInterface;
+class TaintFetchMerge;
 
 /**
  * A burst helper helps organize and manage a packet that is larger than
@@ -499,6 +500,8 @@ class MemCtrl : public qos::MemCtrl
 +    * Create pointer to interface of the actual memory media when connected
 +    */
     MemInterface* dram;
+
+    TaintFetchMerge* taintFM;
 
     virtual AddrRangeList getAddrRanges();
 

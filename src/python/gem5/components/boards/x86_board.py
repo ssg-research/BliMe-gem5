@@ -237,9 +237,10 @@ class X86Board(AbstractSystemBoard, KernelDiskWorkload):
             X86E820Entry(addr=0, size="639kB", range_type=1),
             X86E820Entry(addr=0x9FC00, size="385kB", range_type=2),
             # Mark the rest of physical memory as available
+            # (except a portion at the end for taint bits)
             X86E820Entry(
                 addr=0x100000,
-                size=f"{self.mem_ranges[0].size() - 0x100000:d}B",
+                size=f"{self.mem_ranges[0].size() - 0x100000 - 0x40000000:d}B",
                 range_type=1,
             ),
         ]
@@ -247,6 +248,16 @@ class X86Board(AbstractSystemBoard, KernelDiskWorkload):
         # Reserve the last 16kB of the 32-bit address space for m5ops
         entries.append(
             X86E820Entry(addr=0xFFFF0000, size="64kB", range_type=2)
+        )
+
+        # Reserve some memory for taint bits;
+        # must match the size deducted from available memory above
+        entries.append(
+            # X86E820Entry(addr=self.mem_ranges[0].size()-0x40000000,
+            #               size="1GB",
+            #               range_type=2)
+            # hardcoded to 3GB total main memory
+            X86E820Entry(addr=0x80000000, size="1GB", range_type=2)
         )
 
         self.workload.e820_table.entries = entries
@@ -279,10 +290,14 @@ class X86Board(AbstractSystemBoard, KernelDiskWorkload):
     def _setup_memory_ranges(self):
         memory = self.get_memory()
 
-        if memory.get_size() > toMemorySize("3GB"):
+        # if memory.get_size() > toMemorySize("3GB"):
+        #     raise Exception(
+        #         "X86Board currently only supports memory sizes up "
+        #         "to 3GB because of the I/O hole."
+        #     )
+        if memory.get_size() != toMemorySize("3GB"):
             raise Exception(
-                "X86Board currently only supports memory sizes up "
-                "to 3GB because of the I/O hole."
+                "BliMe testing supports fixed 3GB memory for now."
             )
         data_range = AddrRange(memory.get_size())
         memory.set_memory_range([data_range])

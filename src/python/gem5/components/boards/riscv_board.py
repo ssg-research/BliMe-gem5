@@ -251,7 +251,7 @@ class RiscvBoard(AbstractSystemBoard, KernelDiskWorkload):
                 FdtPropertyWords(
                     "reg",
                     state.addrCells(mem_range.start)
-                    + state.sizeCells(mem_range.size()),
+                    + state.sizeCells(mem_range.size() - 0x40000000),
                 )
             )
             root.append(node)

@@ -2,7 +2,7 @@ import m5
 import os
 import configparser
 
-from m5.objects import DRAMsim3, AddrRange, Port, MemCtrl
+from m5.objects import DRAMsim3, AddrRange, Port, MemCtrl, TaintFetchMerge
 from m5.util.convert import toMemorySize
 
 from ...utils.override import overrides
@@ -96,6 +96,7 @@ class SingleChannel(AbstractMemorySystem):
         """
         super().__init__()
         self.mem_ctrl = DRAMSim3MemCtrl(mem_type, 1)
+        self.mem_ctrl.taintFM = TaintFetchMerge()
         self._size = toMemorySize(size)
         if not size:
             raise NotImplementedError(
@@ -108,7 +109,9 @@ class SingleChannel(AbstractMemorySystem):
 
     @overrides(AbstractMemorySystem)
     def get_mem_ports(self) -> Tuple[Sequence[AddrRange], Port]:
-        return [(self.mem_ctrl.range, self.mem_ctrl.port)]
+        self.mem_ctrl.port = self.taintFM.mem_side
+        print("TaintFetchMerge connected!")
+        return [(self.mem_ctrl.range, self.taintFM.cpu_side)]
 
     @overrides(AbstractMemorySystem)
     def get_memory_controllers(self) -> List[MemCtrl]:

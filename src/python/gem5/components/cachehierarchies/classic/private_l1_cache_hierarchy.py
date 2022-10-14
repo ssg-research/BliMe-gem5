@@ -33,6 +33,7 @@ from ...boards.abstract_board import AbstractBoard
 from ....isas import ISA
 
 from m5.objects import Cache, BaseXBar, SystemXBar, BadAddr, Port
+from m5.objects import TaintFetchMerge
 
 from ....utils.override import *
 
@@ -90,7 +91,9 @@ class PrivateL1CacheHierarchy(AbstractClassicCacheHierarchy):
         board.connect_system_port(self.membus.cpu_side_ports)
 
         for cntr in board.get_memory().get_memory_controllers():
-            cntr.port = self.membus.mem_side_ports
+            cntr.taintFM = TaintFetchMerge()
+            cntr.port = cntr.taintFM.mem_side
+            cntr.taintFM.cpu_side = self.membus.mem_side_ports
 
         self.l1icaches = [
             L1ICache(size=self._l1i_size)

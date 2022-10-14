@@ -32,7 +32,7 @@ from m5.util.convert import toMemorySize
 from typing import List, Sequence, Tuple
 from ..boards.abstract_board import AbstractBoard
 from .abstract_memory_system import AbstractMemorySystem
-from m5.objects import AddrRange, MemCtrl, Port, SimpleMemory
+from m5.objects import AddrRange, MemCtrl, Port, SimpleMemory, TaintFetchMerge
 
 class SingleChannelSimpleMemory(AbstractMemorySystem):
     """A class to implement single channel memory system using SimpleMemory
@@ -57,6 +57,7 @@ class SingleChannelSimpleMemory(AbstractMemorySystem):
             latency=latency, latency_var=latency_var, bandwidth=bandwidth
         )
         self._size = toMemorySize(size)
+        self.taintFM = TaintFetchMerge()
 
     @overrides(AbstractMemorySystem)
     def incorporate_memory(self, board: AbstractBoard) -> None:
@@ -64,7 +65,9 @@ class SingleChannelSimpleMemory(AbstractMemorySystem):
 
     @overrides(AbstractMemorySystem)
     def get_mem_ports(self) -> Sequence[Tuple[AddrRange, Port]]:
-        return [(self.module.range, self.module.port)]
+        self.module.port = self.taintFM.mem_side
+        print("TaintFetchMerge connected!")
+        return [(self.module.range, self.taintFM.cpu_side)]
 
     @overrides(AbstractMemorySystem)
     def get_memory_controllers(self) -> List[MemCtrl]:
