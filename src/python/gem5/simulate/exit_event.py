@@ -73,6 +73,8 @@ class ExitEvent(Enum):
             return ExitEvent.EXIT
         elif exit_string == "simulate() limit reached":
             return ExitEvent.MAX_TICK
+        elif exit_string == "a thread reached the max instruction count":
+            return ExitEvent.MAX_TICK
         elif exit_string == "switchcpu":
             return ExitEvent.SWITCHCPU
         elif exit_string == "m5_fail instruction encountered":
