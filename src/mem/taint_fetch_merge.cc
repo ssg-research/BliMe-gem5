@@ -41,8 +41,10 @@ namespace memory
 
 // NOTE: revert this to 0x81000000 - 0xC0000000 for x86
 #define MEM_BEGIN 0x80000000
-#define ADDRESSABLE_MEM_SIZE 0x1C0000000
-#define TAINT_SIZE 0x40000000
+// #define ADDRESSABLE_MEM_SIZE 0x1C0000000
+// #define TAINT_SIZE 0x40000000
+#define ADDRESSABLE_MEM_SIZE 0x200000000
+#define TAINT_SIZE 0x200000000
 
 TaintFetchMerge::TaintFetchMerge(const TaintFetchMergeParams &params) :
     SimObject(params),
@@ -216,13 +218,15 @@ TaintFetchMerge::handleRequest(PacketPtr pkt)
     blocked = true;
 
     assert(pkt->getSize() % 8 == 0);
-    unsigned int taintPktSize = pkt->getSize() / 8;
+    // unsigned int taintPktSize = pkt->getSize() / 8;
+    unsigned int taintPktSize = pkt->getSize();
 
     // Addr taintAddr = 0x81000000; // fixed addr for now; FIXME
     // Addr taintAddr = distrib(gen);
 
     const Addr taintBegin = MEM_BEGIN + ADDRESSABLE_MEM_SIZE;
-    Addr taintAddr = (pkt->getAddr() - MEM_BEGIN) / 8 + taintBegin;
+    // Addr taintAddr = (pkt->getAddr() - MEM_BEGIN) / 8 + taintBegin;
+    Addr taintAddr = (pkt->getAddr() - MEM_BEGIN) + taintBegin;
     bool taintAddrInRange = false;
     for (auto addrRange : memPort.getAddrRanges()) {
         if (addrRange.contains(taintAddr)) {
